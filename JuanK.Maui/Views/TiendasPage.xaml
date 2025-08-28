@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:JuanK.Maui.ViewModels"
+             x:Class="JuanK.Maui.Views.TiendasPage"
+             Title="TiendasPage">
+    <RefreshView IsRefreshing="{Binding IsBusy}">
+        <CollectionView ItemsSource="{Binding Tiendas}"
+                        SelectionMode="None">
+
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Frame Padding="10" Margin="5">
+                        <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto">
+                            <Image Source="store_icon.png" 
+                                   Grid.RowSpan="2"
+                                   WidthRequest="60"
+                                   HeightRequest="60" />
+
+                            <Label Text="{Binding Nombre}" 
+                                   Grid.Column="1"
+                                   FontSize="16"
+                                   FontAttributes="Bold" />
+
+                            <Label Text="{Binding ProductosCount, StringFormat='{0} productos'}" 
+                                   Grid.Column="1"
+                                   Grid.Row="1"
+                                   TextColor="Gray" />
+                        </Grid>
+
+                        <Frame.GestureRecognizers>
+                            <TapGestureRecognizer 
+                                Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:TiendasViewModel}}, 
+                                Path=TiendaTappedCommand}"
+                                CommandParameter="{Binding .}" />
+                        </Frame.GestureRecognizers>
+                    </Frame>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+
+        </CollectionView>
+    </RefreshView>
+</ContentPage>

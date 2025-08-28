@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="JuanK.Maui.Views.LoginPage"
+             Title="LoginPage">
+    <ScrollView>
+        <VerticalStackLayout Spacing="20" Padding="30">
+
+            <Image Source="logo.png" HeightRequest="100" />
+
+            <Label Text="Delivery Cuba" 
+                   FontSize="24" 
+                   HorizontalOptions="Center" />
+
+            <Entry Placeholder="Correo electrónico" 
+                   Text="{Binding Correo}"
+                   Keyboard="Email" />
+
+            <Entry Placeholder="Contraseña" 
+                   Text="{Binding Clave}"
+                   IsPassword="True" />
+
+            <Button Text="Iniciar Sesión" 
+                    Command="{Binding LoginCommand}"
+                    IsEnabled="{Binding IsNotBusy}" />
+
+            <ActivityIndicator IsRunning="{Binding IsBusy}" 
+                               IsVisible="{Binding IsBusy}" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>
