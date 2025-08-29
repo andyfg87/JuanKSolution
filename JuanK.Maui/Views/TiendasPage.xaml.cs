@@ -4,9 +4,9 @@ namespace JuanK.Maui.Views;
 
 public partial class TiendasPage : ContentPage
 {
-	public TiendasPage()
+	public TiendasPage(TiendasViewModel viewModel)
 	{
 		InitializeComponent();
-		this.BindingContext = new TiendasViewModel();
+		this.BindingContext = viewModel;
 	}
 }

@@ -25,9 +25,20 @@ namespace JuanK.Maui.Services
             ConfigureHttpClient();
         }
 
+        public ApiService(HttpClient httpClient)
+        {
+            _httpClient = httpClient;           
+            _jsonOptions = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            };
+
+            ConfigureHttpClient();
+        }
+
         private void ConfigureHttpClient()
         {
-            _httpClient.BaseAddress = new Uri("https://tu-api.com/api/");
+            _httpClient.BaseAddress = new Uri("http://147.185.238.132:81/api/");
             _authService.ConfigureHttpClient();
         }
 

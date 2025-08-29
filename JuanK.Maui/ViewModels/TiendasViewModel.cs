@@ -31,7 +31,7 @@ namespace JuanK.Maui.ViewModels
         }
 
         public TiendasViewModel()
-        {
+        {            
             TiendaTappedCommand = new Command<TiendaDisplayVM>(OnTiendaTapped);
             LoadTiendas();
         }
