@@ -8,10 +8,10 @@
     Shell.FlyoutBehavior="Disabled"
     Title="JuanK.Maui">
 
-    <TabBar>
-        <Tab Title="Tiendas" Icon="store.png">
-            <ShellContent ContentTemplate="{DataTemplate views:TiendasPage}" />
-        </Tab>
-    </TabBar>
-
+    <!--ShellContent Title="Tiendas"
+                  Route="main"
+                  ContentTemplate="{DataTemplate views:TiendasPage}" /-->
+    <ShellContent Title="Tiendas"
+               Route="main"
+               ContentTemplate="{DataTemplate views:TiendasPage}" />
 </Shell>

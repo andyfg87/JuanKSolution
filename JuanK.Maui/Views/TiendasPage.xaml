@@ -5,8 +5,11 @@
              x:Class="JuanK.Maui.Views.TiendasPage"
              Title="TiendasPage">
     <RefreshView IsRefreshing="{Binding IsBusy}">
+        <Grid>
         <CollectionView ItemsSource="{Binding Tiendas}"
                         SelectionMode="None">
+
+            
 
             <CollectionView.ItemTemplate>
                 <DataTemplate>
@@ -30,14 +33,35 @@
 
                         <Frame.GestureRecognizers>
                             <TapGestureRecognizer 
-                                Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:TiendasViewModel}}, 
-                                Path=TiendaTappedCommand}"
-                                CommandParameter="{Binding .}" />
+        Tapped="OnTiendaTapped" />
                         </Frame.GestureRecognizers>
                     </Frame>
                 </DataTemplate>
             </CollectionView.ItemTemplate>
 
         </CollectionView>
+
+            <!-- Overlay para conexión lenta -->
+            <Border IsVisible="{Binding IsBusy}"
+                BackgroundColor="#80000000"
+                VerticalOptions="Center"
+                HorizontalOptions="Center">
+                <VerticalStackLayout Spacing="20" Padding="30">
+                    <ActivityIndicator IsRunning="True" Color="White" />
+                    <Label Text="Cargando tiendas..." 
+                       TextColor="White" 
+                       HorizontalOptions="Center"
+                       FontSize="16"/>
+                    <Label Text="La conexión está lenta, por favor espere..." 
+                       TextColor="White" 
+                       HorizontalOptions="Center"
+                       FontSize="14"/>
+                    <ProgressBar Progress="{Binding LoadProgress}" 
+                            ProgressColor="Orange"
+                            WidthRequest="200"/>
+                </VerticalStackLayout>
+            </Border>
+
+        </Grid>
     </RefreshView>
 </ContentPage>

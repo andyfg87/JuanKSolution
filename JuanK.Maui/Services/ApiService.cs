@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
@@ -22,6 +23,7 @@ namespace JuanK.Maui.Services
                 PropertyNameCaseInsensitive = true
             };
 
+            _httpClient.Timeout = TimeSpan.FromSeconds(30);
             ConfigureHttpClient();
         }
 
@@ -32,35 +34,87 @@ namespace JuanK.Maui.Services
             {
                 PropertyNameCaseInsensitive = true
             };
-
-            ConfigureHttpClient();
+            _httpClient.BaseAddress = new Uri("http://147.185.238.132:8080/api/");
+            //ConfigureHttpClient();
         }
 
-        private void ConfigureHttpClient()
+        private async void ConfigureHttpClient()
         {
-            _httpClient.BaseAddress = new Uri("http://147.185.238.132:81/api/");
-            _authService.ConfigureHttpClient();
+            try
+            {
+                _httpClient.BaseAddress = new Uri("http://147.185.238.132:8080/api/");
+
+                // Configurar headers comunes
+                _httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
+                _httpClient.DefaultRequestHeaders.Add("User-Agent", "JuanK.Maui");
+
+                var token = await _authService.GetTokenAsync();
+                if (!string.IsNullOrEmpty(token))
+                {
+                    _httpClient.DefaultRequestHeaders.Authorization =
+                        new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error configuring HttpClient: {ex.Message}");
+            }
         }
 
         public async Task<T> GetAsync<T>(string endpoint)
         {
-            try
-            {
-                var response = await _httpClient.GetAsync(endpoint);
-                response.EnsureSuccessStatusCode();
+            int retryCount = 0;
+            const int maxRetries = 3;
 
-                var content = await response.Content.ReadAsStringAsync();
-                return JsonSerializer.Deserialize<T>(content, _jsonOptions);
-            }
-            catch (HttpRequestException ex)
+            while (retryCount < maxRetries)
             {
-                if (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+                try
                 {
-                    // Token expirado, hacer logout
-                    await _authService.LogoutAsync();
+                    Debug.WriteLine($"🔗 Attempt {retryCount + 1}: Calling {endpoint}");
+
+                    var token = await _authService.GetTokenAsync();
+                    if (!string.IsNullOrEmpty(token))
+                    {
+                        _httpClient.DefaultRequestHeaders.Authorization =
+                            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+                    }
+
+                    var response = await _httpClient.GetAsync(endpoint).ConfigureAwait(false);
+
+                    Debug.WriteLine($"📥 Response: {response.StatusCode}");
+
+                    response.EnsureSuccessStatusCode();
+
+                    var content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                    Debug.WriteLine($"✅ Successfully loaded {content.Length} characters");
+
+                    return JsonSerializer.Deserialize<T>(content, new JsonSerializerOptions
+                    {
+                        PropertyNameCaseInsensitive = true
+                    });
                 }
-                throw;
+                catch (TaskCanceledException ex) when (ex.InnerException is TimeoutException)
+                {
+                    retryCount++;
+                    Debug.WriteLine($"⏰ Timeout on attempt {retryCount}, retrying...");
+
+                    if (retryCount >= maxRetries)
+                    {
+                        Debug.WriteLine("❌ Max retries reached");
+                        throw new TimeoutException("La conexión es demasiado lenta después de múltiples intentos");
+                    }
+
+                    // Esperar antes de reintentar (backoff exponencial)
+                    await Task.Delay(TimeSpan.FromSeconds(2 * retryCount));
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"❌ API Error: {ex.Message}");
+                    throw;
+                }
             }
+
+            throw new TimeoutException("No se pudo completar la solicitud después de múltiples intentos");
         }
 
         public async Task<TResponse> PostAsync<TRequest, TResponse>(string endpoint, TRequest data)

@@ -19,7 +19,22 @@ namespace JuanK.Maui
                 });
 
             // Registrar HttpClient
-            builder.Services.AddSingleton<HttpClient>();
+            // Registrar HttpClient con handler específico para Android
+            // Registrar HttpClient con configuración específica para Android
+            builder.Services.AddSingleton<HttpClient>(sp =>
+            {
+                var handler = new HttpClientHandler();
+
+                var httpClient = new HttpClient(handler)
+                {
+                    // Timeout muy generoso para conexiones lentas
+                    Timeout = TimeSpan.FromSeconds(120) // 2 minutos
+                };
+
+                httpClient.BaseAddress = new Uri("http://147.185.238.132:8080/api/");
+
+                return httpClient;
+            });
 
             // Registrar servicios
             builder.Services.AddSingleton<AuthService>();
@@ -32,8 +47,10 @@ namespace JuanK.Maui
             builder.Services.AddTransient<LoginPage>();
             builder.Services.AddTransient<TiendasPage>();
 
+            // Agrega esto para debuggear la inicialización
 #if DEBUG
             builder.Logging.AddDebug();
+            builder.Logging.SetMinimumLevel(LogLevel.Debug);
 #endif
 
             return builder.Build();

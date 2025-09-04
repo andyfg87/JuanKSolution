@@ -15,10 +15,10 @@ namespace JuanK.Maui.Services
         private const string AuthTokenKey = "auth_token";
         private const string UserDataKey = "user_data";
 
-        public AuthService()
+        public AuthService(HttpClient httpClient)
         {
-            _httpClient = new HttpClient();
-            _httpClient.BaseAddress = new Uri("https://tu-api.com/api/"); // Cambiar por tu URL
+            _httpClient = httpClient;
+            _httpClient.BaseAddress = new Uri("http://147.185.238.132:8080/api/"); // Cambiar por tu URL
             _jsonOptions = new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true
@@ -123,10 +123,9 @@ namespace JuanK.Maui.Services
             await Shell.Current.GoToAsync("//login");
         }
 
-        public void ConfigureHttpClient()
+        public async Task ConfigureHttpClientAsync()
         {
-            // Configurar el token en el HttpClient si existe
-            var token = GetTokenAsync().GetAwaiter().GetResult();
+            var token = await GetTokenAsync();
             if (!string.IsNullOrEmpty(token))
             {
                 _httpClient.DefaultRequestHeaders.Authorization =

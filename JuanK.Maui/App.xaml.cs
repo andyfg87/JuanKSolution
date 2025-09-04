@@ -1,4 +1,6 @@
-﻿namespace JuanK.Maui
+﻿using JuanK.Maui.Views;
+
+namespace JuanK.Maui
 {
     public partial class App : Application
     {
@@ -6,7 +8,7 @@
         {
             InitializeComponent();
 
-            MainPage = new AppShell();
+            MainPage = new AppShell();            
         }
     }
 }
